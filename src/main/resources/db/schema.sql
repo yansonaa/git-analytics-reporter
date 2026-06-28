@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS team_member (
     name VARCHAR(100),
     team_id VARCHAR(64),
     is_active BOOLEAN DEFAULT TRUE,
-    role VARCHAR(50)
+    role VARCHAR(64)
 );
 
 CREATE INDEX IF NOT EXISTS idx_team_member_team ON team_member(team_id);

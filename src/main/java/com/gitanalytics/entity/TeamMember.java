@@ -24,6 +24,6 @@ public class TeamMember {
     @Column(name = "is_active")
     private boolean active = true;
 
-    @Column(name = "role", length = 50)
+    @Column(name = "role", length = 64)
     private String role;
 }
