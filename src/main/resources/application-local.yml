@@ -1,0 +1,71 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:git_analytics;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data.sql
+      continue-on-error: true
+      platform: h2
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  cache:
+    type: simple
+  # redis:
+  #   host: localhost
+  #   port: 6379
+  #   password:
+  mail:
+    host: localhost
+    port: 25
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+app:
+  git:
+    token:
+    token-encrypted: false
+    api-url: https://gitlab.com/api/v4
+    clone-dir: /tmp/git-clones
+  report:
+    cron: "0 0 9 1 * ?"
+    from-email: reports@example.com
+    to-emails:
+    default-project-id: default
+  cache:
+    ttl-minutes: 30
+  anomaly:
+    z-score-threshold: 3.0
+    midnight-hour-start: 0
+    midnight-hour-end: 5
+  encrypt:
+    key: GitAnalyticsSecretKey
+
+logging:
+  level:
+    com.gitanalytics: DEBUG
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

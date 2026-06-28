@@ -1,0 +1,87 @@
+spring:
+  application:
+    name: git-analytics-reporter
+  datasource:
+    url: jdbc:postgresql://localhost:5432/git_analytics
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          batch_size: 100
+        order_inserts: true
+        order_updates: true
+        generate_statistics: false
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    lettuce:
+      pool:
+        max-active: 10
+        max-idle: 8
+        min-idle: 2
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+app:
+  git:
+    token: ${GITLAB_TOKEN:}
+    token-encrypted: true
+    api-url: ${GITLAB_API_URL:https://gitlab.com/api/v4}
+    clone-dir: ${GIT_CLONE_DIR:/tmp/git-clones}
+  report:
+    cron: "0 0 9 1 * ?"
+    from-email: ${REPORT_FROM_EMAIL:reports@example.com}
+    to-emails: ${REPORT_TO_EMAILS:}
+    default-project-id: ${DEFAULT_PROJECT_ID:default}
+  cache:
+    ttl-minutes: 30
+  anomaly:
+    z-score-threshold: 3.0
+    midnight-hour-start: 0
+    midnight-hour-end: 5
+  encrypt:
+    key: ${ENCRYPT_KEY:GitAnalyticsSecretKey}
+
+logging:
+  level:
+    com.gitanalytics: INFO
+    org.hibernate.SQL: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
