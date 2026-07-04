@@ -24,12 +24,12 @@ public class CollectController {
         if (since == null) {
             since = LocalDateTime.now().minusMonths(1);
         }
+        // 采集本地数据
         int count = gitCollectorService.collectFromLocalPath(repoPath, projectId, since);
         return ResponseEntity.ok(Map.of(
                 "success", true,
                 "collected", count,
-                "projectId", projectId,
-                "since", since.toString()
+                "projectId", projectId,        "since", since.toString()
         ));
     }
 }
