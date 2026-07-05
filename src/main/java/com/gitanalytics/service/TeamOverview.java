@@ -6,6 +6,9 @@ import lombok.Data;
 @Data
 @Builder
 public class TeamOverview {
+    /**
+     * 总提交次数
+     */
     private long totalCommits;
     private int activeMembers;
     private double avgDailyCommits;
