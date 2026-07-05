@@ -168,4 +168,80 @@ public class ReportExportService {
         private String time;
         private String reason;
     }
+
+    // ========== 原始 Commit 记录导出 ==========
+
+    /**
+     * 导出原始 commit 记录为 CSV
+     */
+    public void exportRawCommitsToCsv(List<CommitRecord> commits, OutputStream out) throws IOException {
+        try (java.io.OutputStreamWriter writer = new java.io.OutputStreamWriter(out, java.nio.charset.StandardCharsets.UTF_8)) {
+            // BOM for Excel to recognize UTF-8
+            writer.write('﻿');
+            // Header
+            writer.write("Commit ID,Project ID,Author Name,Author Email,Commit Time,Add Lines,Delete Lines,Net Lines,File Count,Message,Merge Commit,Automated,Anomaly\n");
+
+            for (CommitRecord c : commits) {
+                writer.write(String.format("%s,%s,%s,%s,%s,%d,%d,%d,%d,\"%s\",%b,%b,%b\n",
+                        c.getCommitId(),
+                        escapeCsv(c.getProjectId()),
+                        escapeCsv(c.getAuthorName()),
+                        escapeCsv(c.getAuthorEmail()),
+                        c.getCommitTime() != null ? c.getCommitTime().format(DATE_FMT) : "",
+                        c.getAddLines(),
+                        c.getDeleteLines(),
+                        c.getNetLines(),
+                        c.getFileCount(),
+                        escapeCsv(c.getMessage()),
+                        c.isMergeCommit(),
+                        c.isAutomated(),
+                        c.isAnomaly()
+                ));
+            }
+            writer.flush();
+        }
+    }
+
+    /**
+     * 导出原始 commit 记录为 Excel（原始 git log 数据）
+     */
+    public void exportRawCommitsToExcel(List<CommitRecord> commits, OutputStream out) throws IOException {
+        try (XSSFWorkbook wb = new XSSFWorkbook()) {
+            Sheet sheet = wb.createSheet("原始提交记录");
+            Row header = sheet.createRow(0);
+            String[] headers = {"Commit ID", "Project ID", "Author Name", "Author Email", "Commit Time",
+                    "Add Lines", "Delete Lines", "Net Lines", "File Count", "Message", "Merge Commit", "Automated", "Anomaly"};
+            for (int i = 0; i < headers.length; i++) {
+                header.createCell(i).setCellValue(headers[i]);
+            }
+
+            int rowNum = 1;
+            for (CommitRecord c : commits) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(c.getCommitId());
+                row.createCell(1).setCellValue(c.getProjectId());
+                row.createCell(2).setCellValue(c.getAuthorName());
+                row.createCell(3).setCellValue(c.getAuthorEmail());
+                row.createCell(4).setCellValue(c.getCommitTime() != null ? c.getCommitTime().format(DATE_FMT) : "");
+                row.createCell(5).setCellValue(c.getAddLines());
+                row.createCell(6).setCellValue(c.getDeleteLines());
+                row.createCell(7).setCellValue(c.getNetLines());
+                row.createCell(8).setCellValue(c.getFileCount());
+                row.createCell(9).setCellValue(c.getMessage());
+                row.createCell(10).setCellValue(c.isMergeCommit());
+                row.createCell(11).setCellValue(c.isAutomated());
+                row.createCell(12).setCellValue(c.isAnomaly());
+            }
+
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+            wb.write(out);
+        }
+    }
+
+    private String escapeCsv(String value) {
+        if (value == null) return "";
+        return value.replace("\"", "\"\"").replace("\n", " ");
+    }
 }
